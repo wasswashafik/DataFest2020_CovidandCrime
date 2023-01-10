@@ -1,0 +1,144 @@
+---
+title: "Before and After Data"
+output: html_notebook
+---
+
+
+```{r}
+library(dplyr)
+
+#data
+AZ <- read.csv("AZ.csv")
+CA <- read.csv("CA.csv")
+PA <- read.csv("PA_2020.csv")
+VT <- read.csv("Burlington_VT.csv")
+CT <- read.csv("Hartford_CT.csv")
+MN  <- read.csv("SaintPaul_MN.csv")
+DC <- read.csv("Washington_D_C_.csv")
+CO <- read.csv("Denver_CO.csv")
+
+###### Code Dates ########
+CA$Date <- as.Date(CA$Incident.Date, "%Y/%m/%d")
+PA$Date <- as.Date(PA$dispatch_date, "%Y-%m-%d")
+
+AZ$OCCURRED.ON <- as.character(AZ$OCCURRED.ON)
+AZ$OCCURRED.ON <- sub("T.*","", AZ$OCCURRED.ON)
+AZ$Date <- AZ$OCCURRED.ON
+AZ$Date <- as.Date(AZ$Date, "%Y-%m-%d")
+
+CT$Date <- as.Date(CT$Date, "%m/%d/%Y")
+MN$Date <- as.Date(MN$DATE, "%m/%d/%Y")
+
+VT$call_time <- as.character(VT$call_time)
+VT$call_time <- sub(" .*","", VT$call_time)
+VT$Date <- VT$call_time
+VT$Date <- as.Date(VT$Date, "%Y-%m-%d")
+
+DC$Date <- as.Date(DC$START_DATE, "%Y/%m/%d")
+
+CO$FIRST_OCCURRENCE_DATE <- sub("  .*","", CO$FIRST_OCCURRENCE_DATE)
+CO$Date <- as.Date(CO$FIRST_OCCURRENCE_DATE, "%m/%d/%Y")
+```
+
+```{r}
+AZ$UCR.CRIME.CATEGORY <- as.character(AZ$UCR.CRIME.CATEGORY)
+CA$Incident.Category <- as.character(CA$Incident.Category)
+PA$text_general_code <- as.character(PA$text_general_code)
+VT$call_type <- as.character(VT$call_type)
+CT$UCR_1_Category <- as.character(CT$UCR_1_Category)
+MN$INCIDENT  <- as.character(MN$INCIDENT)
+```
+
+```{r}
+#unique(grep('VEHICLE', TX$Type.of.Incident, value=TRUE))
+AZ <- AZ[which(AZ$UCR.CRIME.CATEGORY == "MOTOR VEHICLE THEFT"),] 
+CA <- CA[which(CA$Incident.Category == "Motor Vehicle Theft" | CA$Incident.Category == "Motor Vehicle Theft?"),]
+PA <- PA[which(PA$text_general_code == "Theft from Vehicle" | PA$text_general_code == "Motor Vehicle Theft"),]
+VT <- VT[which(VT$call_type == "Larceny - from Motor Vehicle" ),]
+CT <- CT[which(CT$UCR_1_Category == "07* - MOTOR VEHICLE THEFT"  ),]
+MN <- MN[which(MN$INCIDENT == "Auto Theft"), ]
+```
+
+```{r}
+###### Truncate data to 30 days before and after lockdown date ######
+#AZ 2020-03-31
+AZ1 <- subset(AZ, Date >= as.Date("2020-03-31") -30 & Date < as.Date("2020-03-31") +30)
+
+#CA 2020-03-19
+CA1 <- subset(CA, Date >= as.Date("2020-03-19") -30 & Date < as.Date("2020-03-19") +30)
+
+#PA 2020-04-01
+PA1 <- subset(PA, Date >= as.Date("2020-04-01") -30 & Date < as.Date("2020-04-01") +30)
+
+#CT 2020-03-23
+CT1 <- subset(CT, Date >= as.Date("2020-03-23") -30 & Date < as.Date("2020-03-23") +30)
+
+#MN 2020-03-27
+MN1 <- subset(MN, Date >= as.Date("2020-03-27") -30 & Date < as.Date("2020-03-27") +30)
+
+#VT 2020-03-25
+VT1 <- subset(VT, Date >= as.Date("2020-03-25") -30 & Date < as.Date("2020-03-25") +30)
+
+#DC 2020-03-30
+DC1 <- subset(DC, Date >= as.Date("2020-03-30") -30 & Date < as.Date("2020-03-30") +30)
+
+#CO 2020-03-26
+CO1 <- subset(CO, Date >= as.Date("2020-03-26") -30 & Date < as.Date("2020-03-26") +30)
+
+```
+
+```{r}
+#create cases by day
+CA_day <- CA1 %>%
+  group_by(Date) %>%
+  summarize(CA_Incidents_Per_Day = length(Date))
+CT_day <- CT1 %>%
+  group_by(Date) %>%
+  summarize(CT_Incidents_Per_Day = length(Date))
+MN_day <- MN1 %>%
+  group_by(Date) %>%
+  summarize(MN_Incidents_Per_Day = length(Date))
+AZ_day <- AZ1 %>%
+  group_by(Date) %>%
+  summarize(AZ_Incidents_Per_Day = length(Date))
+PA_day <- PA1 %>%
+  group_by(Date) %>%
+  summarize(PA_Incidents_Per_Day = length(Date))
+VT_day <- VT1 %>%
+  group_by(Date) %>%
+  summarize(VT_Incidents_Per_Day = length(Date))
+DC_day <- DC1 %>%
+  group_by(Date) %>%
+  summarize(Incidents_Per_Day = length(Date))
+CO_day <- CO1 %>%
+  group_by(Date) %>%
+  summarize(Incidents_Per_Day = length(Date))
+```
+
+```{r}
+#plot
+par(mfrow = c(3,3))
+plot(CA_day$Incidents_Per_Day~as.Date(CA_day$Date,"%Y-%m-%d"), type = "l")
+abline(v=as.Date("2020-03-19"), col="blue")
+
+plot(CT_day$Incidents_Per_Day~as.Date(CT_day$Date,"%Y-%m-%d"), type = "l")
+abline(v=as.Date("2020-03-23"), col="blue")
+
+plot(MN_day$Incidents_Per_Day~as.Date(MN_day$Date,"%Y-%m-%d"), type = "l")
+abline(v=as.Date("2020-03-27"), col="blue")
+
+plot(AZ_day$Incidents_Per_Day~as.Date(AZ_day$Date,"%Y-%m-%d"), type = "l")
+abline(v=as.Date("2020-03-31"), col="blue")
+
+plot(PA_day$Incidents_Per_Day~as.Date(PA_day$Date,"%Y-%m-%d"), type = "l")
+abline(v=as.Date("2020-04-01"), col="blue")
+
+plot(VT_day$Incidents_Per_Day~as.Date(VT_day$Date,"%Y-%m-%d"), type = "l")
+abline(v=as.Date("2020-03-25"), col="blue")
+
+plot(DC_day$Incidents_Per_Day~as.Date(DC_day$Date,"%Y-%m-%d"), type = "l")
+abline(v=as.Date("2020-03-30"), col="blue")
+
+plot(CO_day$Incidents_Per_Day~as.Date(CO_day$Date,"%Y-%m-%d"), type = "l")
+abline(v=as.Date("2020-03-26"), col="blue")
+```

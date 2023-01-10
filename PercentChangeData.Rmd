@@ -1,0 +1,160 @@
+---
+title: "Percent Change for Cities"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+AZ <- read.csv("AZ.csv")
+CA <- read.csv("CA.csv")
+PA <- read.csv("PA.csv")
+VT <- read.csv("Burlington_VT.csv")
+CT <- read.csv("Hartford_CT.csv")
+MN  <- read.csv("SaintPaul_MN.csv")
+DC_1 <- read.csv("Washington_D_C_.csv")
+DC_2 <- read.csv("WDC.csv")
+CO <- read.csv("Denver_CO.csv")
+```
+
+```{r}
+###### Code Dates ########
+CA$Date <- as.Date(CA$Incident.Date, "%Y/%m/%d")
+PA$Date <- as.Date(PA$dispatch_date, "%Y-%m-%d")
+
+AZ$OCCURRED.ON <- as.character(AZ$OCCURRED.ON)
+AZ$OCCURRED.ON <- sub("T.*","", AZ$OCCURRED.ON)
+AZ$Date <- AZ$OCCURRED.ON
+AZ$Date <- as.Date(AZ$Date, "%Y-%m-%d")
+
+CT$Date <- as.Date(CT$Date, "%m/%d/%Y")
+MN$Date <- as.Date(MN$DATE, "%m/%d/%Y")
+
+VT$call_time <- as.character(VT$call_time)
+VT$call_time <- sub(" .*","", VT$call_time)
+VT$Date <- VT$call_time
+VT$Date <- as.Date(VT$Date, "%Y-%m-%d")
+
+DC_1$Date <- as.Date(DC_1$START_DATE, "%Y/%m/%d")
+DC_2$Date <- as.Date(DC_2$START_DATE, "%Y/%m/%d")
+CO$FIRST_OCCURRENCE_DATE <- sub("  .*","", CO$FIRST_OCCURRENCE_DATE)
+CO$Date <- as.Date(CO$FIRST_OCCURRENCE_DATE, "%m/%d/%Y")
+```
+
+```{r}
+###### Truncate data to 30 days after lockdown date and corresponding dates in 2019 ######
+#AZ from 2020-03-31 to (but not including) 2020-04-30 and 2019
+AZ1 <- subset(AZ, Date >= "2020-03-31" & Date < "2020-04-30")
+AZ2 <- subset(AZ, Date >= "2019-03-31" & Date < "2019-04-30")
+AZnew <- bind_rows(AZ1,AZ2)
+
+#CA from 2020-03-19 to (but not including) 2020-04-18 and 2019
+CA1 <- subset(CA, Date >= "2020-03-19" & Date < "2020-04-18")
+CA2 <- subset(CA, Date >= "2019-03-19" & Date < "2019-04-18")
+CAnew <- bind_rows(CA1,CA2)
+
+#PA from 2020-04-01 to (but not including) 2020-05-01 and 2019
+PA1 <- subset(PA, Date >= "2020-04-01" & Date < "2020-05-01")
+PA2 <- subset(PA, Date >= "2019-04-01" & Date < "2019-05-01")
+PAnew <- bind_rows(PA1,PA2)
+
+#CT from 2020-03-23 to (but not including) 2020-04-22 and 2019
+CT1 <- subset(CT, Date >= "2020-03-23" & Date < "2020-04-22")
+CT2 <- subset(CT, Date >= "2019-03-23" & Date < "2019-04-22")
+
+#MN from 2020-03-27 to (but not including) 2020-04-26 and 2019
+MN1 <- subset(MN, Date >= "2020-03-27" & Date < "2020-04-26")
+MN2 <- subset(MN, Date >= "2019-03-27" & Date < "2019-04-26")
+
+#VT from 2020-03-25 to (but not including) 2020-04-24 and 2019
+VT1 <- subset(VT, Date >= "2020-03-25" & Date < "2020-04-24")
+VT2 <- subset(VT, Date >= "2019-03-25" & Date < "2019-04-24")
+
+#DC from 2020-03-30 to (but not including) 2020-04-29
+DC1 <- subset(DC_1, Date >= "2020-03-30" & Date < "2020-04-29")
+DC2 <- subset(DC_2, Date >= "2019-03-30" & Date < "2019-04-29")
+
+#CO from 2020-03-26 to (but not including) 2020-04-25
+CO1 <- subset(CO, Date >= "2020-03-26" & Date < "2020-04-25")
+CO2 <- subset(CO, Date >= "2019-03-26" & Date < "2019-04-25")
+```
+
+```{r}
+###### Create % Change data by Case ###### 
+#Number of cases for 2019
+AZ2019 <- nrow(AZ2)
+CA2019 <- nrow(CA2)
+PA2019 <- nrow(PA2)
+CT2019 <- nrow(CT2)
+MN2019 <- nrow(MN2)
+VT2019 <- nrow(VT2)
+DC2019 <- nrow(DC2)
+CO2019 <- nrow(CO2)
+#Number of cases for 2020
+AZ2020 <- nrow(AZ1)
+CA2020 <- nrow(CA1)
+PA2020 <- nrow(PA1)
+CT2020 <- nrow(CT1)
+MN2020 <- nrow(MN1)
+VT2020 <- nrow(VT1)
+DC2020 <- nrow(DC1)
+CO2020 <- nrow(CO1)
+
+#%change for AZ
+((AZ2020-AZ2019)/AZ2019)*100
+#%change for CA
+((CA2020-CA2019)/CA2019)*100
+#%change for PA
+((PA2020-PA2019)/PA2019)*100
+#%change for CT
+((CT2020-CT2019)/CT2019)*100
+#%change for MN
+((MN2020-MN2019)/MN2019)*100
+#%change for VT
+((VT2020-VT2019)/VT2019)*100
+#%change for DC
+((DC2020-DC2019)/DC2019)*100
+#%change for CO
+((CO2020-CO2019)/CO2019)*100
+```
+
+```{r}
+###### Create % Change data by Case PERCAPITA (per person) ######
+#Number of cases for 2019
+AZ2019.pc <- AZ2019/1680000
+CA2019.pc <- CA2019/889000
+PA2019.pc <- PA2019/1580000
+CT2019.pc <- CT2019/121810
+MN2019.pc <- MN2019/309800
+VT2019.pc <- VT2019/42960
+DC2019.pc <- DC2019/711570
+CO2019.pc <- CO2019/725310
+#Number of cases for 2020
+AZ2020.pc <- AZ2020/1700000
+CA2020.pc <- CA2020/896000
+PA2020.pc <- PA2020/1590000
+CT2020.pc <- CT2020/121033
+MN2020.pc <- MN2020/311895
+VT2020.pc <- VT2020/43021
+DC2020.pc <- DC2020/720687
+CO2020.pc <- CO2020/734134
+
+#%change for AZ
+((AZ2020.pc-AZ2019.pc)/AZ2019.pc)*100
+#%change for CA
+((CA2020.pc-CA2019.pc)/CA2019.pc)*100
+#%change for PA
+((PA2020.pc-PA2019.pc)/PA2019.pc)*100
+#%change for CT
+((CT2020.pc-CT2019.pc)/CT2019.pc)*100
+#%change for MN
+((MN2020.pc-MN2019.pc)/MN2019.pc)*100
+#%change for VT
+((VT2020.pc-VT2019.pc)/VT2019.pc)*100
+#%change for DC
+((DC2020.pc-DC2019.pc)/DC2019.pc)*100
+#%change for CO
+((CO2020.pc-CO2019.pc)/CO2019.pc)*100
+```
+
+
+

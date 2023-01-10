@@ -1,0 +1,98 @@
+---
+title: "Crimes Per Day for 30 days after Lockdown"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(dplyr)
+
+#data
+AZ <- read.csv("AZ.csv")
+CA <- read.csv("CA.csv")
+PA <- read.csv("PA_2020.csv")
+VT <- read.csv("Burlington_VT.csv")
+CT <- read.csv("Hartford_CT.csv")
+MN  <- read.csv("SaintPaul_MN.csv")
+DC <- read.csv("Washington_D_C_.csv")
+CO <- read.csv("Denver_CO.csv")
+TX <- read.csv("Dallas_TX.csv")
+
+###### Code Dates ########
+CA$Date <- as.Date(CA$Incident.Date, "%Y/%m/%d")
+PA$Date <- as.Date(PA$dispatch_date, "%Y-%m-%d")
+
+AZ$OCCURRED.ON <- as.character(AZ$OCCURRED.ON)
+AZ$OCCURRED.ON <- sub("T.*","", AZ$OCCURRED.ON)
+AZ$Date <- AZ$OCCURRED.ON
+AZ$Date <- as.Date(AZ$Date, "%Y-%m-%d")
+
+CT$Date <- as.Date(CT$Date, "%m/%d/%Y")
+MN$Date <- as.Date(MN$DATE, "%m/%d/%Y")
+
+VT$call_time <- as.character(VT$call_time)
+VT$call_time <- sub(" .*","", VT$call_time)
+VT$Date <- VT$call_time
+VT$Date <- as.Date(VT$Date, "%Y-%m-%d")
+
+DC$Date <- as.Date(DC$START_DATE, "%Y/%m/%d")
+
+CO$FIRST_OCCURRENCE_DATE <- sub("  .*","", CO$FIRST_OCCURRENCE_DATE)
+CO$Date <- as.Date(CO$FIRST_OCCURRENCE_DATE, "%m/%d/%Y")
+
+TX$Date <- as.Date(TX$Date1.of.Occurrence, "%Y-%m-%d")
+
+###### Truncate data to 30 days after lockdown date ######
+#AZ from 2020-03-31 to (but not including) 2020-04-30
+AZ1 <- subset(AZ, Date >= "2020-03-31" & Date < "2020-04-30")
+
+#CA from 2020-03-19 to (but not including) 2020-04-18
+CA1 <- subset(CA, Date >= "2020-03-19" & Date < "2020-04-18")
+
+#PA from 2020-04-01 to (but not including) 2020-05-01
+PA1 <- subset(PA, Date >= "2020-04-01" & Date < "2020-05-01")
+
+#CT from 2020-03-23 to (but not including) 2020-04-22
+CT1 <- subset(CT, Date >= "2020-03-23" & Date < "2020-04-22")
+
+#MN from 2020-03-27 to (but not including) 2020-04-26
+MN1 <- subset(MN, Date >= "2020-03-27" & Date < "2020-04-26")
+
+#VT from 2020-03-25 to (but not including) 2020-04-24
+VT1 <- subset(VT, Date >= "2020-03-25" & Date < "2020-04-24")
+
+#DC from 2020-03-30 to (but not including) 2020-04-29
+DC1 <- subset(DC, Date >= "2020-03-30" & Date < "2020-04-29")
+
+#CO from 2020-03-26 to (but not including) 2020-04-25
+CO1 <- subset(CO, Date >= "2020-03-26" & Date < "2020-04-25")
+
+#DC from 2020-03-30 to (but not including) 2020-04-29
+TX1 <- subset(TX, Date >= "2020-04-02" & Date < "2020-05-02")
+```
+
+```{r}
+#################### VECTOR FOR EACH CITY 30 DAYS AFTER LOCKDOWN #################
+
+#name of data set
+filenames <- list()
+#Population number for 2020
+q <- c()
+
+#get vector of crimes per day per 1000 people
+z <- 1
+for (i in filenames){
+by1000 <- q[z]/1000
+
+#create cases by day by 1000 people
+a <- i %>%
+  group_by(Date) %>%
+  summarize(Incidents_Per_Day = length(Date)/by1000)
+
+print(a$Incidents_Per_Day)
+z + 1 
+}
+```
+
+

@@ -1,0 +1,87 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library("RColorBrewer")
+library(ggplot2)
+library(TTR)
+
+city <- read.csv("By_City.csv")
+```
+
+```{r}
+#Check if any of the crime increases are statistically significant
+lm1 <- lm(city$Los.Angeles~city$Days)
+summary(lm1)
+lm2 <- lm(city$San.Francisco~city$Days)
+summary(lm2)
+lm <- lm(city$Chicago~city$Days)
+summary(lm)
+lm3 <- lm(city$Hartford~city$Days)
+summary(lm3)
+lm <- lm(city$Boston~city$Days)
+summary(lm)
+lm <- lm(city$Burlington~city$Days)
+summary(lm)
+lm <- lm(city$Louisville~city$Days)
+summary(lm)
+lm <- lm(city$Saint.Paul~city$Days)
+summary(lm)
+lm <- lm(city$Baltimore~city$Days)
+summary(lm)
+lm <- lm(city$Montgomery.County~city$Days)
+summary(lm)
+lm <- lm(city$Memphis~city$Days)
+summary(lm)
+lm <- lm(city$Phoenix~city$Days)
+summary(lm)
+lm <- lm(city$Philadelphia~city$Days)
+summary(lm)
+lm <- lm(city$Dallas~city$Days)
+summary(lm)
+lm <- lm(city$Washington.D.C.~city$Days)
+summary(lm)
+lm4 <- lm(city$Denver~city$Days)
+summary(lm4)
+```
+
+```{r}
+#Univariate Plots
+par(mfrow = c(2,2))
+plot(city$Los.Angeles~city$Days, type = "l", ylab = "Crimes per day per 1000 residents", xlab = "Days since lockdown", main = "Los Angeles, CA")
+abline(lm1, col = "red")
+plot(city$San.Francisco~city$Days, type = "l", ylab = "Crimes per day per 1000 residents", xlab = "Days since lockdown", main = "San Francisco, CA")
+abline(lm2, col = "red")
+plot(city$Hartford~city$Days, type = "l", ylab = "Crimes per day per 1000 residents", xlab = "Days since lockdown", main = "Hartford, CT")
+abline(lm3, col = "red")
+plot(city$Denver~city$Days, type = "l", ylab = "Crimes per day per 1000 residents", xlab = "Days since lockdown", main = "Denver, CO")
+abline(lm4, col = "red")
+```
+
+```{r}
+#GRAPH
+ggplot(data = city, aes(x=Days, y=value, color=variable )) + 
+  xlab('Day') + 
+  ylab('Incidents per day per 1000') + 
+  geom_line(aes(y=city$Los.Angeles , col='Los Angeles, CA'), size=1, alpha=.5) + 
+  geom_line(aes(y=city$San.Francisco, col='San Francisco, CA'),  size=1, alpha=.5) + 
+  geom_line(aes(y=city$Boston, col='Boston, MA'),  size=1, alpha=.5) +
+  geom_line(aes(y=city$Hartford, col='Hartford, CT'),  size=1, alpha=.5) + geom_line(aes(y=city$Boston, col='Boston, MA'),  size=1, alpha=.5) + geom_line(aes(y=city$Burlington, col='Burlington, VT'),  size=1, alpha=.5) + 
+  geom_line(aes(y=city$Louisville, col='Louisville, KY'),  size=1, alpha=.5) + 
+  geom_line(aes(y=city$Saint.Paul, col='Saint Paul, MN'),  size=1, alpha=.5) + 
+  geom_line(aes(y=city$Baltimore, col='Baltimore, MD'),  size=1, alpha=.5) + geom_line(aes(y=city$Montgomery.County, col='Montgomery County, MD'),  size=1, alpha=.5) + 
+  geom_line(aes(y=city$Memphis, col='Memphis, TN'),  size=1, alpha=.5) +
+  geom_line(aes(y=city$Phoenix, col='Phoenix, AZ'),  size=1, alpha=.5) + geom_line(aes(y=city$Philadelphia, col='Philidelphia, PA'),  size=1, alpha=.5) + 
+  geom_line(aes(y=city$Dallas, col='Dallas, TX'),  size=1, alpha=.5) +
+  geom_line(aes(y=city$Washington.D.C., col='Washington D.C.'),  size=1, alpha=.5) + geom_line(aes(y=city$Denver, col='Denver, CO'),  size=1, alpha=.5) + theme(legend.position= 'right')	
+```
+
+```{r}
+#Time Series Analysis with SMA
+LA_ts <- SMA(city$Los.Angeles,n=7)
+#simple moving average with banwidth of 7 to simulate week
+plot(city$Los.Angeles, type = "l", ylab = "Incidents Per 1000", xlab = "Day", main = "Incidents Per 1000 by Day in Los Angeles")
+lines (LA_ts, type = "l", col = "red")
+```

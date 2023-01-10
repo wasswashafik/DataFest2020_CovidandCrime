@@ -1,0 +1,89 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(ggplot2)
+
+auto <- read.csv("AutoTheft.csv")
+
+auto$BA <- rep(1:2, each = 30)
+  auto$BA[auto$BA == 1] <- "before"
+  auto$BA[auto$BA == 2] <- "after"
+auto$BA <- as.factor(auto$BA)
+
+levels(auto$BA) <- c("before","after")
+```
+
+```{r}
+#Test for normality
+shapiro.test(auto$Los.Angeles)
+shapiro.test(auto$San.Francisco)
+shapiro.test(auto$Chicago)
+shapiro.test(auto$Hartford)
+shapiro.test(auto$Boston)
+shapiro.test(auto$Burlington)
+shapiro.test(auto$Louisville)
+shapiro.test(auto$Saint.Paul)
+shapiro.test(auto$Baltimore)
+shapiro.test(auto$Montgomery.County)
+shapiro.test(auto$Memphis)
+shapiro.test(auto$Phoenix)
+shapiro.test(auto$Philadelphia)
+shapiro.test(auto$Dallas)
+shapiro.test(auto$Washington.D.C.)
+shapiro.test(auto$Denver)
+
+
+#we will test the log transformed data (mapping 0 to 0) for those that did not meet normality assumptions
+auto$Hartford <- log1p(auto$Hartford)
+auto$Boston <- log1p(auto$Boston)
+auto$Burlington <- log1p(auto$Burlington)
+auto$Saint.Paul <- log1p(auto$Saint.Paul)
+auto$Montgomery.County <- log1p(auto$Montgomery.County)
+auto$Washington.D.C. <- log1p(auto$Washington.D.C.)
+```
+
+```{r}
+#Analysis
+t.test(Los.Angeles~BA, data = auto, paired = TRUE)
+t.test(San.Francisco~BA, data = auto, paired = TRUE)
+t.test(Chicago~BA, data = auto, paired = TRUE)
+t.test(Hartford~BA, data = auto, paired = TRUE)
+t.test(Boston~BA, data = auto, paired = TRUE)
+t.test(Burlington~BA, data = auto, paired = TRUE)
+t.test(Louisville~BA, data = auto, paired = TRUE)
+t.test(Saint.Paul~BA, data = auto, paired = TRUE)
+t.test(Baltimore~BA, data = auto, paired = TRUE)
+t.test(Montgomery.County~BA, data = auto, paired = TRUE)
+t.test(Memphis~BA, data = auto, paired = TRUE)
+t.test(Phoenix~BA, data = auto, paired = TRUE)
+t.test(Philadelphia~BA, data = auto, paired = TRUE)
+t.test(Dallas~BA, data = auto, paired = TRUE)
+t.test(Washington.D.C.~BA, data = auto, paired = TRUE)
+t.test(Denver~BA, data = auto, paired = TRUE)
+```
+
+```{r}
+#Boxplots of significant cities
+require(gridExtra)
+plot1 <- ggplot(auto, aes(BA, Los.Angeles)) + xlab("Before/After Lockdown") + ylab("Los Angeles") +
+        geom_boxplot()
+plot2 <- ggplot(auto, aes(BA, Boston)) + xlab("Before/After Lockdown") +
+        geom_boxplot()
+plot3 <- ggplot(auto, aes(BA, Louisville)) + xlab("Before/After Lockdown") +
+        geom_boxplot()
+plot4 <- ggplot(auto, aes(BA, Saint.Paul)) + xlab("Before/After Lockdown") + ylab("Saint Paul") +
+        geom_boxplot()
+plot5 <- ggplot(auto, aes(BA, Baltimore)) + xlab("Before/After Lockdown") +
+        geom_boxplot()
+plot6 <- ggplot(auto, aes(BA, Philadelphia)) + xlab("Before/After Lockdown") +
+        geom_boxplot()
+plot7 <- ggplot(auto, aes(BA, Washington.D.C.)) + xlab("Before/After Lockdown") + ylab("Washington D.C.") +
+        geom_boxplot()
+plot8 <- ggplot(auto, aes(BA, Denver)) + xlab("Before/After Lockdown") +
+        geom_boxplot()
+grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, ncol=3)
+```
+

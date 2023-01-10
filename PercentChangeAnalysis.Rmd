@@ -1,0 +1,50 @@
+---
+title: "Linear Regression Model"
+output: html_notebook
+---
+
+```{r}
+#import libraries
+library(dplyr)
+library(ggplot2)
+
+#read in data
+crime <- read.csv("crime.csv")
+
+#take commas out of numbers and change from factor to integer
+crime$Pop_2020 <- as.numeric(gsub(",", "", crime$Pop_2020))
+crime$Pop_2019 <- as.numeric(gsub(",", "", crime$Pop_2019))
+
+#change Date to a date variable
+crime$Date <- as.Date(crime$Date, "%Y-%m-%d")
+```
+
+```{r}
+######## MODEL ########
+
+#scatterplot
+plot(crime$Change_Percap~as.Date(crime$Date,"%d/%m/%y"), ylab = "% Change in Crime Incidents percapita", xlab = "Date of Lockdown")
+
+#multiple linear regression
+lm <- lm(Change_Percap ~ Date + Duration, data=crime)
+summary(lm)
+
+#Check residuals
+par(mfrow = c(2, 2)) 
+plot(lm)
+
+#scatterplot with linear regression line for date
+lm1 <- lm(Change_Percap ~ Date, data=crime)
+plot(crime$Change_Percap~as.Date(crime$Date,"%d/%m/%y"), ylab = "% Change in Crime per Capita", xlab = "Date of Lockdown")
+abline(lm1)
+
+#scatterplot with linear regression line for duration
+lm2 <- lm(Change_Percap ~ Duration, data=crime)
+plot(crime$Change_Percap~ crime$Duration, ylab = "% Change in Crime per Capita", xlab = "Duration of Lockdown (days)")
+abline(lm2)
+```
+
+
+
+
+
